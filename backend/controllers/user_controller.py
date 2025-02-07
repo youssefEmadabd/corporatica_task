@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from mongoengine import QuerySet
+from flask import Blueprint, request, jsonify
 
 from backend.controllers.base_controller import BaseController
 from backend.database_models.users import User
@@ -7,7 +8,15 @@ from backend.utilities import create_access_token, is_valid_password, APIExcepti
 from database_manager.constants import UserKeys
 
 class UserController(BaseController):
-    def login(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+
+    def __init__(self):
+        self.blueprint = Blueprint("api/users", __name__)
+        
+        # Register routes
+        self.blueprint.add_url_rule("/login", "login", self.login, methods=["POST"])
+        self.blueprint.add_url_rule("/register", "register", self.login, methods=["POST"])
+
+    def login(self) -> Dict[str, Any]:
         """
         Authenticates a user and returns a JWT token if successful.
 
@@ -20,6 +29,8 @@ class UserController(BaseController):
         Raises:
             APIException: If the username is invalid or the password does not match.
         """
+        payload = request.json
+
         username = payload.get("username")
         password = payload.get("password")
         users: QuerySet = self._database_manager.get(User, username=username)
@@ -30,11 +41,11 @@ class UserController(BaseController):
         
         if is_valid_password(user[UserKeys.PASSWORD.value], password):
             token = create_access_token({"sub": username})
-            return {"access_token": token}
+            return jsonify({"access_token": token})
 
         raise APIException(status_code=401, message="Invalid password")
 
-    def register(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def register(self) -> Dict[str, Any]:
         """
         Registers a new user and returns a JWT token if successful.
 
@@ -47,6 +58,8 @@ class UserController(BaseController):
         Raises:
             APIException: If the username or email is already in use.
         """
+        payload = request.json
+
         username = payload.get("username")
         email = payload.get("email")
         password = payload.get("password")
@@ -60,5 +73,8 @@ class UserController(BaseController):
         user.save()
         token = create_access_token({"sub": username})
 
-        return {"access_token": token}
-    
+        return jsonify({"access_token": token})
+
+# Create an instance to be used in `app.py`
+user_controller = UserController()
+user_bp = user_controller.blueprint

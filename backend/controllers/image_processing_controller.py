@@ -6,11 +6,12 @@ class ImageController:
     
     def __init__(self):
         self.processor = ImageProcessor()
-        self.blueprint = Blueprint("image", __name__)
+        self.blueprint = Blueprint("api/image", __name__)
         
         # Register routes
         self.blueprint.add_url_rule("/upload", "upload_image", self.upload_image, methods=["POST"])
-
+    
+    @protected
     def upload_image(self):
         """Handles image uploads and returns the processed image."""
         return jsonify(self.processor.process_uploaded_image())
