@@ -7,7 +7,7 @@ from jose import JWTError
 
 from backend.utilities.api_exception import APIException
 
-secret_key = os.environ.get("SECRET_KEY")
+secret_key = os.environ.get("JWT_SECRET")
 hashing_algorithm = os.environ.get("HASHING_ALGORITHM")
 
 def decode_token(token: str) -> Optional[Dict[str, Any]]:
@@ -25,7 +25,7 @@ def protected(func):
 
         # Check if token is in the request headers
         if "Authorization" in request.headers:
-            token = request.headers["Authorization"].split(" ")[1]  # Bearer <token>
+            token = request.headers.get("Authorization")
 
         if not token or not token.startswith("Bearer "):
             raise APIException(status_code=401, message="Unauthorized access")

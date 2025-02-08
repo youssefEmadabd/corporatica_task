@@ -1,6 +1,7 @@
 from typing import Type, Dict, Any
+from abc import ABCMeta as AbstractMeta
 
-class SingletonMeta(type):
+class SingletonMeta(AbstractMeta):
     """ A thread-safe Singleton metaclass. """
     _instances: Dict[Type, Any] = {}
     _init_args: Dict[Type, tuple] = {}  # Store init args

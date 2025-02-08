@@ -3,13 +3,16 @@ from mongoengine import QuerySet
 from flask import Blueprint, request, jsonify
 
 from backend.controllers.base_controller import BaseController
+from backend.database_manager.database_manager import DatabaseManager
+from backend.database_manager.generic_database_manager import GenericDatabaseManager
 from backend.database_models.users import User
 from backend.utilities import create_access_token, is_valid_password, APIException, hash_password
 from database_manager.constants import UserKeys
 
 class UserController(BaseController):
 
-    def __init__(self):
+    def __init__(self, database_manager: GenericDatabaseManager):
+        super().__init__(database_manager)
         self.blueprint = Blueprint("api/users", __name__)
         
         # Register routes
@@ -40,7 +43,7 @@ class UserController(BaseController):
             raise APIException(status_code=401, message="Invalid username")
         
         if is_valid_password(user[UserKeys.PASSWORD.value], password):
-            token = create_access_token({"sub": username})
+            token = create_access_token({"sub": str(user.pk)})
             return jsonify({"access_token": token})
 
         raise APIException(status_code=401, message="Invalid password")
@@ -71,10 +74,6 @@ class UserController(BaseController):
         hashed_password = hash_password(password)
         user = User(username=username, email=email, password=hashed_password)
         user.save()
-        token = create_access_token({"sub": username})
+        token = create_access_token({"sub": str(user.pk)})
 
         return jsonify({"access_token": token})
-
-# Create an instance to be used in `app.py`
-user_controller = UserController()
-user_bp = user_controller.blueprint

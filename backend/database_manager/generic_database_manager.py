@@ -1,7 +1,9 @@
 from abc import ABC as AbstractClass, abstractmethod
 from typing import Any, Dict
 
-class GenericDatabaseManager(AbstractClass):
+from backend.utilities.singleton_meta import SingletonMeta
+
+class GenericDatabaseManager(AbstractClass, metaclass=SingletonMeta):
     """An interface for database managers.
     """
     

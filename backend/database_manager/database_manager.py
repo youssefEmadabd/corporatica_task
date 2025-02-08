@@ -3,10 +3,10 @@ from typeguard import typechecked
 from typing import Any, Dict, Optional, Type
 
 from backend.database_manager.generic_database_manager import GenericDatabaseManager
-from backend.utilities import SingletonMeta, print_log
+from backend.utilities import print_log
 
 @typechecked
-class DatabaseManager(GenericDatabaseManager, metaclass=SingletonMeta):
+class DatabaseManager(GenericDatabaseManager):
     """ a database manager for an in-memory dictionary acting as a database
     """
     def __init__(self, connection_string: str, database_name: str):
